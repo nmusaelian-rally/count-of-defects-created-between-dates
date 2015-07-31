@@ -12,9 +12,11 @@
     componentCls: 'app',
     _startDate:null,
     _endDate:null,
-    _createdDefectCount:0,
-    _fixedDefectCount:0,
-    _adminClosedDefectCount:0,
+    _createdDefects:0,
+    _fixedDefects:0,
+    _adminClosedDefects:0,
+    _fixedDefectsTTR:0,
+    _adminClosedDefectsTTR:0,
     launch: function() {
 	var that = this;
 	var minDate = new Date(new Date() - 86400000*360); //minDate cannot be further than one year
@@ -98,7 +100,7 @@
             filters:filters,
             listeners: {
                 load: function(store,records,success){
-                    this._createdDefectCount = records.length;
+                    this._createdDefects = records.length;
                     this._getFixedDefects();
                 },
                 scope:this
@@ -139,17 +141,18 @@
 	    {
 		property : 'Resolution',
 		value: 'Configuration Change'
-	    },
+	    }
             ])
         ])
         var myStore = Ext.create('Rally.data.wsapi.Store',{
             model: 'Defect',
             autoLoad:true,
-            fetch: ['Name','State','FormattedID'],
+            fetch: ['Name','State','FormattedID','CreationDate','ClosedDate'],
             filters:filters,
             listeners: {
                 load: function(store,records,success){
-                    this._fixedDefectCount = records.length;
+                    this._fixedDefects = records.length;
+                    this._fixedDefectsTTR = this._getClosedDefectsWithinTTR(records);
                     this._getAdminClosedDefects();
                 },
                 scope:this
@@ -199,11 +202,12 @@
         var myStore = Ext.create('Rally.data.wsapi.Store',{
             model: 'Defect',
             autoLoad:true,
-            fetch: ['Name','State','FormattedID'],
+            fetch: ['Name','State','FormattedID','CreationDate','ClosedDate'],
             filters:filters,
             listeners: {
                 load: function(store,records,success){
-                    this._adminClosedDefectCount = records.length;
+                    this._adminClosedDefects = records.length;
+                    this._adminClosedDefectsTTR = this._getClosedDefectsWithinTTR(records);
                     this._makeStore();
                 },
                 scope:this
@@ -211,16 +215,37 @@
         });
     },
     
+    _getClosedDefectsWithinTTR:function(records){
+        var closedDefectWithinTTRCount = [];
+        var ttr = 20;
+        _.each(records, function(record){
+            var created = new Date(record.get('CreationDate'));
+            var closed = new Date(record.get('ClosedDate'));
+            console.log(record.get('FormattedID'));
+            console.log('created',created);
+            console.log('closed',closed);
+            var diff = Math.floor((closed - created)/86400000); 
+            console.log('diff', diff);
+            if (diff <= ttr) {
+                closedDefectWithinTTRCount.push(record);
+            }
+        });
+        return closedDefectWithinTTRCount.length;
+    },
+    
     _makeStore:function(){
         var records = [];
         var d = {
-            "CreatedDefects" : this._createdDefectCount,
-            "FixedDefects" : this._fixedDefectCount,
-            "AdminClosedDefects" : this._adminClosedDefectCount
+            "CreatedDefects" : this._createdDefects,
+            "FixedDefects" : this._fixedDefects,
+            "AdminClosedDefects" : this._adminClosedDefects,
+            "FixedDefectsTTR" : this._fixedDefectsTTR,
+            "AdminClosedDefectsTTR" : this._adminClosedDefectsTTR
         };
         records.push(d);
         this._makeGrid(records);
     },
+    
     _makeGrid:function(records){
         if (this._grid) {
             this._grid.destroy();
@@ -242,6 +267,14 @@
                 {
                     text: 'Administratively Closed Defects',
                     dataIndex: 'AdminClosedDefects'
+                },
+                {
+                    text: 'Fixed Defect (TTR)',
+                    dataIndex: 'FixedDefectsTTR'
+                },
+                {
+                    text: 'Administratively Closed Defects (TTR)',
+                    dataIndex: 'AdminClosedDefectsTTR'
                 }
             ]
         });
@@ -249,7 +282,6 @@
         
     }
 });
-
 
             Rally.launchApp('CustomApp', {
                 name:"Count of Defects created between two dates",
