@@ -21,6 +21,7 @@ Ext.define('CustomApp', {
 		minDate: minDate,
                 showToday: false,
                 margin: '10 20 20 10',
+                cls: 'rally-date-picker',
 		handler: function(picker, date) {
 		    that._onStartDateSelected(date);
 		    }
@@ -31,11 +32,12 @@ Ext.define('CustomApp', {
 		minDate: minDate,
                 margin:'10 20 20 10',
                 showToday: false,
+                cls: 'rally-date-picker',
 		handler: function(picker, date) {
 		     that._onEndDateSelected(date);
 		}
 	    }],
-            maxWidth: 450
+            maxWidth: 500
 	});        
 	this.add(datePicker);
 	var panel =  Ext.create('Ext.panel.Panel', {
@@ -43,7 +45,7 @@ Ext.define('CustomApp', {
             padding: '10 10 10 10',
 	    componentCls: 'panel',
             html: 'CHOOSE START AND END DATES:',
-            maxWidth: 450
+            maxWidth: 500
 	});
 	this.add(panel);
     },
@@ -89,6 +91,7 @@ Ext.define('CustomApp', {
             autoLoad:true,
             fetch: ['Name','State','FormattedID'],
             filters:filters,
+            limit: Infinity,
             listeners: {
                 load: function(store,records,success){
                     this._createdDefects = records.length;
@@ -140,6 +143,7 @@ Ext.define('CustomApp', {
             autoLoad:true,
             fetch: ['Name','State','FormattedID','CreationDate','ClosedDate'],
             filters:filters,
+            limit: Infinity,
             listeners: {
                 load: function(store,records,success){
                     this._fixedDefects = records.length;
@@ -260,11 +264,11 @@ Ext.define('CustomApp', {
                     dataIndex: 'AdminClosedDefects'
                 },
                 {
-                    text: 'Fixed Defect (TTR)',
+                    text: 'Fixed Defect (TTR <= 20)',
                     dataIndex: 'FixedDefectsTTR'
                 },
                 {
-                    text: 'Administratively Closed Defects (TTR)',
+                    text: 'Administratively Closed Defects (TTR <= 20)',
                     dataIndex: 'AdminClosedDefectsTTR'
                 }
             ]
