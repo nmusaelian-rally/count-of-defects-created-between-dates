@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Count of Defects created between two dates</title>
+
+    <script type="text/javascript" src="https://rally1.rallydev.com/apps/2.0/sdk.js"></script>
+
+    <script type="text/javascript">
+        Rally.onReady(function () {
+                Ext.define("CustomApp",{extend:"Rally.app.App",componentCls:"app",_startDate:null,_endDate:null,_createdDefectCount:0,_fixedDefectCount:0,_adminClosedDefectCount:0,launch:function(){var that=this,minDate=new Date(new Date-31104e6),datePicker=Ext.create("Ext.panel.Panel",{bodyPadding:10,renderTo:Ext.getBody(),layout:"hbox",items:[{xtype:"rallydatepicker",itemId:"from",minDate:minDate,showToday:!1,margin:"10 20 20 10",handler:function(picker,date){that._onStartDateSelected(date)}},{xtype:"rallydatepicker",itemId:"to",minDate:minDate,margin:"10 20 20 10",showToday:!1,handler:function(picker,date){that._onEndDateSelected(date)}}],maxWidth:450});this.add(datePicker);var panel=Ext.create("Ext.panel.Panel",{id:"infoPanel",padding:"10 10 10 10",componentCls:"panel",html:"CHOOSE START AND END DATES:",maxWidth:450});this.add(panel)},_onStartDateSelected:function(date){console.log(date),this._startDate=Rally.util.DateTime.format(new Date(date),"Y-m-d"),this._endDate?(Ext.getCmp("infoPanel").update("DATE RANGE: "+this._startDate+" and "+this._endDate),this._getCreatedDefects()):Ext.getCmp("infoPanel").update("START DATE SELECTED: "+this._startDate+". PICK END DATE")},_onEndDateSelected:function(date){console.log(date),this._endDate=Rally.util.DateTime.format(new Date(date),"Y-m-d"),Ext.getCmp("infoPanel").update("DATE RANGE: "+this._startDate+" and "+this._endDate),this._getCreatedDefects()},_getCreatedDefects:function(){var filters=[{property:"CreationDate",operator:">=",value:this._startDate},{property:"CreationDate",operator:"<=",value:this._endDate},{property:"Tags.Name",operator:"contains",value:"Customer Voice"}],myStore=Ext.create("Rally.data.wsapi.Store",{model:"Defect",autoLoad:!0,fetch:["Name","State","FormattedID"],filters:filters,listeners:{load:function(store,records,success){this._createdDefectCount=records.length,this._getFixedDefects()},scope:this}})},_getFixedDefects:function(){var filters=Rally.data.wsapi.Filter.and([{property:"ClosedDate",operator:">=",value:this._startDate},{property:"ClosedDate",operator:"<=",value:this._endDate},{property:"Tags.Name",operator:"contains",value:"Customer Voice"},{property:"State",value:"Closed"},Rally.data.wsapi.Filter.or([{property:"Resolution",value:"Code Change"},{property:"Resolution",value:"Database/Metadata Change"},{property:"Resolution",value:"Configuration Change"}])]),myStore=Ext.create("Rally.data.wsapi.Store",{model:"Defect",autoLoad:!0,fetch:["Name","State","FormattedID"],filters:filters,listeners:{load:function(store,records,success){this._fixedDefectCount=records.length,this._getAdminClosedDefects()},scope:this}})},_getAdminClosedDefects:function(){var filters=Rally.data.wsapi.Filter.and([{property:"ClosedDate",operator:">=",value:this._startDate},{property:"ClosedDate",operator:"<=",value:this._endDate},{property:"Tags.Name",operator:"contains",value:"Customer Voice"},{property:"State",value:"Closed"},Rally.data.wsapi.Filter.or([{property:"Resolution",operator:"!=",value:"Code Change"},{property:"Resolution",operator:"!=",value:"Database/Metadata Change"},{property:"Resolution",operator:"!=",value:"Configuration Change"}])]),myStore=Ext.create("Rally.data.wsapi.Store",{model:"Defect",autoLoad:!0,fetch:["Name","State","FormattedID"],filters:filters,listeners:{load:function(store,records,success){this._adminClosedDefectCount=records.length,this._makeStore()},scope:this}})},_makeStore:function(){var records=[],d={CreatedDefects:this._createdDefectCount,FixedDefects:this._fixedDefectCount,AdminClosedDefects:this._adminClosedDefectCount};records.push(d),this._makeGrid(records)},_makeGrid:function(records){this._grid&&this._grid.destroy(),this._grid=Ext.create("Rally.ui.grid.Grid",{itemId:"defectGrid",store:Ext.create("Rally.data.custom.Store",{data:records}),columnCfgs:[{text:"Created Defects",dataIndex:"CreatedDefects"},{text:"Fixed Defect",dataIndex:"FixedDefects"},{text:"Administratively Closed Defects",dataIndex:"AdminClosedDefects"}]}),this.add(this._grid)}});
+
+            Rally.launchApp('CustomApp', {
+                name:"Count of Defects created between two dates",
+	            parentRepos:""
+            });
+
+        });
+    </script>
+
+
+    <style type="text/css">
+        
+    </style>
+</head>
+<body>
+</body>
+</html>
