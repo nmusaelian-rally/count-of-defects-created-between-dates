@@ -199,6 +199,7 @@ Ext.define('CustomApp', {
             autoLoad:true,
             fetch: ['Name','State','FormattedID','CreationDate','ClosedDate'],
             filters:filters,
+            limit: Infinity,
             listeners: {
                 load: function(store,records,success){
                     this._adminClosedDefects = records.length;
@@ -271,7 +272,8 @@ Ext.define('CustomApp', {
                     text: 'Administratively Closed Defects (TTR <= 20)',
                     dataIndex: 'AdminClosedDefectsTTR'
                 }
-            ]
+            ],
+            showPagingToolbar:false
         });
         this.add(this._grid);
         
