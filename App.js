@@ -176,7 +176,6 @@ Ext.define('CustomApp', {
                 property : 'State',
 		value: 'Closed'
             },
-            Rally.data.wsapi.Filter.or([
             {
 		property : 'Resolution',
                 operator: '!=',
@@ -192,8 +191,8 @@ Ext.define('CustomApp', {
                 operator: '!=',
 		value: 'Configuration Change'
 	    }
-            ])
         ]);
+        console.log('filter to string', filters.toString());
         var myStore = Ext.create('Rally.data.wsapi.Store',{
             model: 'Defect',
             autoLoad:true,
@@ -276,6 +275,5 @@ Ext.define('CustomApp', {
             showPagingToolbar:false
         });
         this.add(this._grid);
-        
     }
 });
