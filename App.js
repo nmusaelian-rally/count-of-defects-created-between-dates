@@ -77,7 +77,7 @@ Ext.define('CustomApp', {
 	    },
 	    {
 		property : 'CreationDate',
-		operator : '<=',
+		operator : '<',
 		value : this._endDate
 	    },
 	    {
@@ -111,7 +111,7 @@ Ext.define('CustomApp', {
 	    },
 	    {
 		property : 'ClosedDate',
-		operator : '<=',
+		operator : '<',
 		value : this._endDate
 	    },
 	    {
@@ -164,7 +164,7 @@ Ext.define('CustomApp', {
 	    },
 	    {
 		property : 'ClosedDate',
-		operator : '<=',
+		operator : '<',
 		value : this._endDate
 	    },
 	    {
